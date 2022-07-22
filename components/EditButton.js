@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { StyleSheet, Pressable, View, Text } from "react-native";
 
 function EditButton(props) {

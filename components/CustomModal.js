@@ -14,6 +14,7 @@ function CustomModal(props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
+  const [error, setError] = useState(false);
   const placeText =
     "Write a little bit about yourself. Do you like chatting? are you a smoker? Etc.";
 
@@ -37,23 +38,61 @@ function CustomModal(props) {
     setStory(story);
   };
 
+  const onlyLetters = (text) => {
+    return /^[a-zA-Z]+$/.test(text);
+  };
+
+  //returns true if the string contains only Numbers or phone format
+  const onlyNumbers = (phone) => {
+    return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(
+      phone
+    );
+  };
+
+  // returns true if the string is in a valid email format
+  const validateEmail = (email) => {
+    return email.match(
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+  };
+
   const onUpdate = () => {
     switch (props.action) {
       case "name":
-        props.onUpdate(() => {
-          return firstName + " " + lastName;
-        });
+        if (onlyLetters(firstName) && onlyLetters(lastName)) {
+          setError(false);
+          props.onUpdate(() => {
+            return firstName + " " + lastName;
+          });
+        } else {
+          setError(true);
+        }
         break;
       case "phone number":
-        props.onUpdate(phone);
+        if (onlyNumbers(phone)) {
+          setError(false);
+          props.onUpdate(phone);
+        } else {
+          setError(true);
+        }
         break;
       case "email":
-        props.onUpdate(email);
+        if (validateEmail(email)) {
+          setError(false);
+          props.onUpdate(email);
+        } else {
+          setError(true);
+        }
         break;
       case "story":
         props.onUpdate(story);
         break;
     }
+  };
+
+  const onCancel = () => {
+    setError(false);
+    props.onCancel();
   };
 
   return (
@@ -72,6 +111,7 @@ function CustomModal(props) {
               <TextInput
                 style={styles.input}
                 value={firstName}
+                maxLength={20}
                 onChangeText={firstNameInputHandler}
               />
             </View>
@@ -79,6 +119,7 @@ function CustomModal(props) {
               <Text style={styles.fieldTitle}>Last Name</Text>
               <TextInput
                 style={styles.input}
+                maxLength={20}
                 onChangeText={lastNameInputHandler}
                 value={lastName}
               />
@@ -91,6 +132,8 @@ function CustomModal(props) {
               <TextInput
                 style={styles.input}
                 value={phone}
+                keyboardType="phone-pad"
+                maxLength={14}
                 onChangeText={phoneInputHandler}
               />
             </View>
@@ -102,6 +145,7 @@ function CustomModal(props) {
               <TextInput
                 style={styles.input}
                 value={email}
+                maxLength={64}
                 onChangeText={emailInputHandler}
               />
             </View>
@@ -113,6 +157,7 @@ function CustomModal(props) {
               <TextInput
                 style={styles.story}
                 multiline={true}
+                maxLength={240}
                 value={story}
                 onChangeText={storyInputHandler}
                 placeholder={placeText}
@@ -120,6 +165,14 @@ function CustomModal(props) {
             </View>
           </View>
         ) : null}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>
+              {" "}
+              Please enter valid {props.action}{" "}
+            </Text>
+          </View>
+        )}
         {/* buttons */}
         <View style={styles.buttonContainer}>
           <Pressable onPress={onUpdate}>
@@ -127,7 +180,7 @@ function CustomModal(props) {
               <Text style={styles.btnText}>Update</Text>
             </View>
           </Pressable>
-          <Pressable onPress={props.onCancel}>
+          <Pressable onPress={onCancel}>
             <View style={styles.btnContainer}>
               <Text style={styles.btnText}>Cancel</Text>
             </View>
@@ -159,7 +212,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingLeft: 10,
     paddingRight: 10,
-    marginBottom: 200,
+    marginBottom: 100,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -182,7 +235,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 200,
+    marginBottom: 100,
   },
   phoneInputContainer: {
     width: "50%",
@@ -223,7 +276,6 @@ const styles = StyleSheet.create({
   storyContainer: {
     width: "100%",
     height: 200,
-    marginBottom: 75,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -238,6 +290,16 @@ const styles = StyleSheet.create({
     height: "85%",
     textAlignVertical: "top",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  errorContainer: {
+    width: "100%",
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
     fontWeight: "bold",
   },
 });

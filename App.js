@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StatusBar } from "expo-status-bar";
+// import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Button, Modal, Image } from "react-native";
 
 import EditButton from "./components/EditButton";
